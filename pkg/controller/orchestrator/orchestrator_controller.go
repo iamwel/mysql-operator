@@ -191,6 +191,11 @@ func (r *ReconcileMysqlCluster) Reconcile(request reconcile.Request) (reconcile.
 	// save old status
 	status := *cluster.Status.DeepCopy()
 
+	// Set defaults on cluster
+	// Some filed like .spec.replicas can be nil and throw a panic error.
+	// By setting defaults will ensure that all fields are set at least with a default value.
+	r.scheme.Default(cluster.Unwrap())
+
 	syncers := []syncer.Interface{
 		// this syncer mutuates the cluster and updates it. Should be the first syncer
 		newFinalizerSyncer(r.Client, r.scheme, cluster, r.orcClient),
